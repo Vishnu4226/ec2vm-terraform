@@ -6,7 +6,7 @@ terraform {
     organization = "testorg-prod"
 
     workspaces {
-      name = "test-workspace-new"
+      name = "ec2vm-terraform"
     }
   }
 }

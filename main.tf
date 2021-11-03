@@ -1,21 +1,21 @@
-locals {
-  settings = yamldecode(file("values.yaml"))
-}
+#locals {
+#  settings = yamldecode(file("values.yaml"))
+#}
 module "data_ec2_instance" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
   name = local.settings.data.name
-  ami                    = local.settings.data.imageid
-  instance_type          = local.settings.data.instancetype
-  key_name               = local.settings.data.keypair
+  ami                    = "${var.ami}"
+  instance_type          = "${var.instancetype}"
+  key_name               = "${var.keypair}"
   monitoring             = true
-  user_data = <<EOF
-<powershell>
-Set-AWSCredential -AccessKey "${var.accesskey}" -SecretKey "${var.secretkey}" -Region "${var.region}"
-Restart-Computer
-</powershell>
-EOF
-  vpc_security_group_ids = [local.settings.data.securitygroupid, aws_security_group.datainstancesg.id]
+  #user_data = <<EOF
+#<powershell>
+#Set-AWSCredential -AccessKey "${var.accesskey}" -SecretKey "${var.secretkey}" -Region "${var.region}"
+#Restart-Computer
+#</powershell>
+#EOF
+  vpc_security_group_ids = [var.securitygroupid, aws_security_group.datainstancesg.id]
   root_block_device = [{
            delete_on_termination = "true"
 		   device_name           = "/dev/sda1"
@@ -28,12 +28,12 @@ EOF
            encrypted             = "true"
            volume_size           = "100"
   }]
-  subnet_id              = local.settings.data.subnetid
+  subnet_id              = "${var.subnet}"
   tags = {
     Description               = "Database Instance for EAMI Rx with EFT Prenote Middle 3 Tier TARB 275 RFC 32",
-	"DHCS:SupportContact"       = "genady.gidenko@dhcs.ca.gov",
-	"DHCS:ManagedBy"            = "genady.gidenko@dhcs.ca.gov",
-	"DHCS:ProgramContact"       = "genady.gidenko@dhcs.ca.gov",
+	"DHCS:SupportContact"       = "gonuguntavishnu@gmail.com",
+	"DHCS:ManagedBy"            = "gonuguntavishnu@gmail.com",
+	"DHCS:ProgramContact"       = "gonuguntavishnu@gmail.com",
 	"DHCS:Environment"          = "Capman Dev 3285",
 	"DHCS:ApplicationName"      = "EAMI Rx with EFT Prenote Middle 3 Tier TARB 275 RFC 32",
 	"DHCS:BackupPolicy"         = "Group C",
@@ -47,7 +47,7 @@ EOF
 resource "aws_security_group" "datainstancesg" {
   name                   = "securityGroupdatainstance22"
   description            = "datansg"
-  vpc_id                 = "vpc-71777f09"
+  vpc_id                 = "${var.vpc}"
 
 
   ingress {
